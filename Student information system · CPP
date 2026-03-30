@@ -1,0 +1,224 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ──────────────────────────────────────────────────────────
+//  Node structure (one student record = one linked-list node)
+// ──────────────────────────────────────────────────────────
+struct Student {
+    int    rollNo;
+    string name;
+    string course;
+    float  marks;
+    Student* next;  
+};
+
+// ──────────────────────────────────────────────────────────
+//  Head pointer (start of the linked list)
+// ──────────────────────────────────────────────────────────
+Student* head = nullptr;
+
+// ──────────────────────────────────────────────────────────
+//  Helper: display a single record
+// ──────────────────────────────────────────────────────────
+void displayRecord(Student* s) {
+    cout << "\n-----------------------------------\n";
+    cout << " Roll No : " << s->rollNo  << "\n";
+    cout << " Name    : " << s->name    << "\n";
+    cout << " Course  : " << s->course  << "\n";
+    cout << " Marks   : " << s->marks   << "\n";
+    cout << "-----------------------------------\n";
+}
+
+// ============================================================
+//  1. ADD NEW RECORD
+// ============================================================
+void addRecord() {
+    Student* newNode = new Student();
+
+    cout << "\n=== Add New Record ===\n";
+    cout << "Enter Roll No : "; cin >> newNode->rollNo;
+    cin.ignore();
+    cout << "Enter Name    : "; getline(cin, newNode->name);
+    cout << "Enter Course  : "; getline(cin, newNode->course);
+    cout << "Enter Marks   : "; cin >> newNode->marks;
+
+    newNode->next = nullptr;
+
+    if (head == nullptr) {
+        head = newNode;
+    } else {
+        Student* temp = head;
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }
+
+    cout << "\n[+] Record added successfully!\n";
+}
+
+// ============================================================
+//  2. SEARCH A RECORD
+// ============================================================
+void searchRecord() {
+    cout << "\n=== Search a Record ===\n";
+    int roll;
+    cout << "Enter Roll No to search : "; cin >> roll;
+
+    Student* ptr = head;   // pointer starts from the head
+
+    // Search from start to end
+    while (ptr != nullptr) {
+        if (ptr->rollNo == roll) {
+            cout << "\n[✓] Record Found:";
+            displayRecord(ptr);
+            return;
+        }
+        ptr = ptr->next;
+    }
+
+    cout << "\n[!] Record with Roll No " << roll << " not found.\n";
+}
+
+// ============================================================
+//  3. MODIFY (UPDATE) A RECORD
+// ============================================================
+void modifyRecord() {
+    cout << "\n=== Modify a Record ===\n";
+    int roll;
+    cout << "Enter Roll No to modify : "; cin >> roll;
+
+    Student* ptr = head;
+
+    while (ptr != nullptr) {
+        if (ptr->rollNo == roll) {
+            cout << "\n[✓] Record found. Enter new details:\n";
+            cin.ignore();
+            cout << "Enter New Name   : "; getline(cin, ptr->name);
+            cout << "Enter New Course : "; getline(cin, ptr->course);
+            cout << "Enter New Marks  : "; cin >> ptr->marks;
+            // ptr->rollNo stays the same (primary key)
+            cout << "\n[✓] Record updated successfully!\n";
+            return;
+        }
+        ptr = ptr->next;
+    }
+
+    cout << "\n[!] Record with Roll No " << roll << " not found.\n";
+}
+
+// ============================================================
+//  4. DELETE A RECORD
+// ============================================================
+void deleteRecord() {
+    cout << "\n=== Delete a Record ===\n";
+    int roll;
+    cout << "Enter Roll No to delete : "; cin >> roll;
+
+    // Case 1: List is empty
+    if (head == nullptr) {
+        cout << "\n[!] List is empty. Nothing to delete.\n";
+        return;
+    }
+
+    // Case 2: Head node itself is the target
+    if (head->rollNo == roll) {
+        Student* temp = head;
+        head = head->next;   // move head forward
+        delete temp;
+        cout << "\n[✓] Record deleted successfully!\n";
+        return;
+    }
+
+    // Case 3: Search for the node; keep track of the previous node
+    Student* prev = head;
+    Student* curr = head->next;
+
+    while (curr != nullptr) {
+        if (curr->rollNo == roll) {
+            // Connect the node before with the node after (bypass curr)
+            prev->next = curr->next;
+            delete curr;
+            cout << "\n[✓] Record deleted successfully!\n";
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+
+    cout << "\n[!] Record with Roll No " << roll << " not found.\n";
+}
+
+// ──────────────────────────────────────────────────────────
+//  Display ALL records (bonus utility)
+// ──────────────────────────────────────────────────────────
+void displayAll() {
+    if (head == nullptr) {
+        cout << "\n[!] No records found.\n";
+        return;
+    }
+    cout << "\n=== All Student Records ===\n";
+    Student* temp = head;
+    while (temp != nullptr) {
+        displayRecord(temp);
+        temp = temp->next;
+    }
+}
+
+// ──────────────────────────────────────────────────────────
+//  Clean up dynamically allocated memory before exit
+// ──────────────────────────────────────────────────────────
+void freeList() {
+    Student* temp;
+    while (head != nullptr) {
+        temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+// ============================================================
+//  MAIN – Menu handled by if-else statements
+// ============================================================
+int main() {
+    int choice;
+
+    cout << "\n************************************\n";
+    cout << "  Student Information System (C++)  \n";
+    cout << "************************************\n";
+
+    do {
+        // ── Display Menu ──
+        cout << "\n========== MENU ==========\n";
+        cout << " 1. Add New Record\n";
+        cout << " 2. Search a Record\n";
+        cout << " 3. Modify a Record\n";
+        cout << " 4. Delete a Record\n";
+        cout << " 5. Display All Records\n";
+        cout << " 0. Exit\n";
+        cout << "==========================\n";
+        cout << "Enter your choice : "; cin >> choice;
+
+        // ── Menu handled by if-else statement ──
+        if (choice == 1) {
+            addRecord();
+        } else if (choice == 2) {
+            searchRecord();
+        } else if (choice == 3) {
+            modifyRecord();
+        } else if (choice == 4) {
+            deleteRecord();
+        } else if (choice == 5) {
+            displayAll();
+        } else if (choice == 0) {
+            cout << "\nExiting... Goodbye!\n";
+        } else {
+            cout << "\n[!] Invalid choice. Please try again.\n";
+        }
+
+    } while (choice != 0);
+
+    freeList();  
+    return 0;
+}
